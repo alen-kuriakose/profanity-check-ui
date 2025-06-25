@@ -1,5 +1,8 @@
+
+const BASE_URL = process.env.NEXT_PUBLIC_PROFANITY_API_BASEURL ;
+
 export async function checkProfanity(word: string) {
-  const res = await fetch("http://localhost:8000/api/v1/profanity/fasttext", {
+  const res = await fetch(`${BASE_URL}/api/v1/profanity/fasttext`, {
     method: "POST",
     headers: { "Content-Type": "application/json", accept: "application/json" },
     body: JSON.stringify({ text: word }),
@@ -11,7 +14,7 @@ export async function checkProfanity(word: string) {
 }
 
 export async function verifyWithLLM(word: string) {
-  const res = await fetch("http://localhost:8000/api/v1/profanity/llm", {
+  const res = await fetch(`${BASE_URL}/api/v1/profanity/llm`, {
     method: "POST",
     headers: { "Content-Type": "application/json", accept: "application/json" },
     body: JSON.stringify({ text: word }),
