@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_PROFANITY_API_BASEURL;
+const BASE_URL =  "https://portal.dev.karmayogibharat.net/profanity-check-api";
 
 export async function checkProfanity(word: string) {
   console.log(
