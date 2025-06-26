@@ -71,13 +71,13 @@ export default function ProfanityChecker() {
             <Search className="w-8 h-8 text-blue-600" />
           </div>
           <h1 className="text-2xl font-bold text-slate-900 mb-2">Profanity Checker</h1>
-          <p className="text-slate-600">Check if a word contains profane content</p>
+          <p className="text-slate-600">Check if a sentence or phrase contains profane content</p>
         </div>
         <Card className="rounded-xl shadow-lg border border-slate-200">
           <CardContent className="p-6 space-y-6">
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="word-input">Enter word to check</Label>
+                <Label htmlFor="word-input">Enter sentence or phrase to check</Label>
                 <Input
                   id="word-input"
                   type="text"
@@ -107,7 +107,7 @@ export default function ProfanityChecker() {
                     </>
                   ) : (
                     <>
-                      <Search className="w-4 h-4" /> Check Word
+                      <Search className="w-4 h-4" /> Check Profanity
                     </>
                   )}
                 </Button>
@@ -218,7 +218,7 @@ export default function ProfanityChecker() {
           </CardContent>
         </Card>
         <div className="text-center mt-6 text-sm text-slate-500">
-          Enter any word to check for profane content
+          Enter any sentence or phrase to check for profane content
         </div>
       </div>
     </div>
