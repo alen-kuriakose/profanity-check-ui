@@ -1,11 +1,11 @@
 const BASE_URL =  "https://portal.dev.karmayogibharat.net/profanity-check-api";
 
 export async function checkProfanity(word: string) {
-  console.log(
-    "Base URL:",
-    BASE_URL,
-    process.env.NEXT_PUBLIC_PROFANITY_API_BASEURL
-  );
+  // console.log(
+  //   "Base URL:",
+  //   BASE_URL,
+  //   process.env.NEXT_PUBLIC_PROFANITY_API_BASEURL
+  // );
   const res = await fetch(`${BASE_URL}/api/v1/profanity/fasttext`, {
     method: "POST",
     headers: { "Content-Type": "application/json", accept: "application/json" },
@@ -19,11 +19,11 @@ export async function checkProfanity(word: string) {
 }
 
 export async function verifyWithLLM(word: string) {
-  console.log(
-    "Base URL:",
-    BASE_URL,
-    process.env.NEXT_PUBLIC_PROFANITY_API_BASEURL
-  );
+  // console.log(
+  //   "Base URL:",
+  //   BASE_URL,
+  //   process.env.NEXT_PUBLIC_PROFANITY_API_BASEURL
+  // );
 
   const res = await fetch(`${BASE_URL}/api/v1/profanity/llm`, {
     method: "POST",
