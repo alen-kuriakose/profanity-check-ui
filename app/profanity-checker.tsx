@@ -93,12 +93,12 @@ export default function ProfanityChecker() {
     }
   };
 
-  const handleDetectLanguage = async () => {
+  const handleDetectLanguage = async (words:string) => {
     setLangDetectLoading(true);
     setError("");
     setDetectedLanguage("");
     try {
-      const data = await detectLanguage(inputWord.trim());
+      const data = await detectLanguage(words.trim());
       if (
         data.detected_language === "english" ||
         data.detected_language === "indic"
@@ -374,7 +374,7 @@ export default function ProfanityChecker() {
                           e.target.value.trim().length >= 5
                         ) {
                           langDetectTimeout.current = setTimeout(() => {
-                            handleDetectLanguage();
+                            handleDetectLanguage(e.target.value);
                           }, 500);
                         } else if (langDetectEnabled) {
                           setDetectedLanguage("");
