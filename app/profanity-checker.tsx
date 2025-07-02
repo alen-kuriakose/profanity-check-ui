@@ -22,6 +22,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import { log } from "console";
 // import { Toggle } from "@/components/ui/toggle";
 
 const TABS = [
@@ -32,7 +33,7 @@ const TABS = [
 export default function ProfanityChecker() {
   // Ref for debounce timeout
   const langDetectTimeout = useRef<NodeJS.Timeout | null>(null);
-  const [activeTab, setActiveTab] = useState("fasttext");
+  const [activeTab, setActiveTab] = useState("transformer");
   const [inputWord, setInputWord] = useState("");
   const [result, setResult] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -78,6 +79,7 @@ export default function ProfanityChecker() {
     }
     setTransformerLoading(true);
     setError("");
+    setLlmResult(null);
     setTransformerResult(null);
     try {
       let lang: "english" | "indic" | undefined = selectedLanguage || undefined;
@@ -93,7 +95,7 @@ export default function ProfanityChecker() {
     }
   };
 
-  const handleDetectLanguage = async (words:string) => {
+  const handleDetectLanguage = async (words: string) => {
     setLangDetectLoading(true);
     setError("");
     setDetectedLanguage("");
@@ -148,7 +150,7 @@ export default function ProfanityChecker() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl">
+      <div className="w-full max-w-4xl">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
             <Search className="w-8 h-8 text-blue-600" />
@@ -166,14 +168,14 @@ export default function ProfanityChecker() {
             setActiveTab(val);
             resetCheck();
           }}
-          className=""
+          className="w-full"
         >
           <TabsList className="flex flex-col md:flex-row gap-2 justify bg-gray-200/50 ">
-            <TabsTrigger value="fasttext" className="w-full">
-              Profanity Check (FastText)
-            </TabsTrigger>
             <TabsTrigger value="transformer">
-              Profanity Check (Transformer, English/Indic)
+              Transformer, English/Indic
+            </TabsTrigger>
+            <TabsTrigger value="fasttext" className="w-full">
+              FastText, English
             </TabsTrigger>
           </TabsList>
           <Card className="rounded-xl shadow-lg border border-slate-200">
@@ -356,7 +358,94 @@ export default function ProfanityChecker() {
               </TabsContent>
 
               <TabsContent value="transformer">
-                <div className="space-y-4">
+                <div className="space-y-4 ">
+                  <div className="flex flex-col md:flex-row md:items-center items-start gap-3  justify-between">
+                    <div className="flex flex-col md:flex-row gap-3 md:items-center ">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          id="lang-detect-checkbox"
+                          checked={langDetectEnabled}
+                          onChange={(e) => {
+                            setLangDetectEnabled(e.target.checked);
+                            if (!e.target.checked) {
+                              setDetectedLanguage("");
+                            } else if (inputWord.trim().length >= 5) {
+                              console.log("Detecting language...", inputWord);
+
+                              handleDetectLanguage(inputWord);
+                            }
+                          }}
+                          className="accent-blue-600 w-4 h-4 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                        />
+                        <Label
+                          htmlFor="lang-detect-checkbox"
+                          className="cursor-pointer select-none"
+                        >
+                          Detect Language
+                          {langDetectEnabled && (
+                            <span className=" text-xs text-slate-500">
+                              (min 5 chars)
+                            </span>
+                          )}
+                        </Label>
+                      </div>
+
+                      {langDetectLoading && (
+                        <Loader2 className="w-4 h-4 animate-spin ml-2" />
+                      )}
+                      {langDetectEnabled && detectedLanguage && (
+                        <span className="text-xs text-green-600">
+                          Detected: {detectedLanguage}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <Label htmlFor="language-select">Language:</Label>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="min-w-[200px] h-8 justify-between"
+                            id="language-select"
+                            // disabled={langDetectEnabled && !!detectedLanguage}
+                          >
+                            {langDetectEnabled && detectedLanguage
+                              ? detectedLanguage.charAt(0).toUpperCase() +
+                                detectedLanguage.slice(1)
+                              : selectedLanguage
+                              ? selectedLanguage.charAt(0).toUpperCase() +
+                                selectedLanguage.slice(1)
+                              : "Select"}
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start" className="min-w-[200px]">
+                          <DropdownMenuItem
+                            onSelect={() => {
+                              setLangDetectEnabled(false);
+                              setSelectedLanguage("english");
+                              setDetectedLanguage("english");
+                            }}
+                            // disabled={langDetectEnabled && !!detectedLanguage}
+                          >
+                            English
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onSelect={() => {
+                              setLangDetectEnabled(false);
+                              setSelectedLanguage("indic");
+                              setDetectedLanguage("indic");
+                            }}
+                            // disabled={langDetectEnabled && !!detectedLanguage}
+                          >
+                            Indic
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
+
                   <div className="space-y-2">
                     <Label htmlFor="word-input-transformer">
                       Enter sentence or phrase to check
@@ -377,6 +466,8 @@ export default function ProfanityChecker() {
                             handleDetectLanguage(e.target.value);
                           }, 500);
                         } else if (langDetectEnabled) {
+                          console.log("sdgjas");
+
                           setDetectedLanguage("");
                         }
                       }}
@@ -386,76 +477,7 @@ export default function ProfanityChecker() {
                       className="w-full"
                     />
                   </div>
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      id="lang-detect-checkbox"
-                      checked={langDetectEnabled}
-                      onChange={(e) => {
-                        setLangDetectEnabled(e.target.checked);
-                        if (!e.target.checked) {
-                          setDetectedLanguage("");
-                        } else if (inputWord.trim().length >= 5) {
-                          handleDetectLanguage();
-                        }
-                      }}
-                      className="accent-blue-600 w-4 h-4 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-                    />
-                    <Label
-                      htmlFor="lang-detect-checkbox"
-                      className="cursor-pointer select-none"
-                    >
-                      Detect Language
-                    </Label>
-                    {langDetectEnabled && (
-                      <span className="ml-2 text-xs text-slate-500">
-                        (min 5 chars)
-                      </span>
-                    )}
-                    {langDetectLoading && (
-                      <Loader2 className="w-4 h-4 animate-spin ml-2" />
-                    )}
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Label htmlFor="language-select">Language:</Label>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className="min-w-[120px] justify-between"
-                          id="language-select"
-                          disabled={langDetectEnabled && !!detectedLanguage}
-                        >
-                          {langDetectEnabled && detectedLanguage
-                            ? detectedLanguage.charAt(0).toUpperCase() +
-                              detectedLanguage.slice(1)
-                            : selectedLanguage
-                            ? selectedLanguage.charAt(0).toUpperCase() +
-                              selectedLanguage.slice(1)
-                            : "Select"}
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start">
-                        <DropdownMenuItem
-                          onSelect={() => setSelectedLanguage("english")}
-                          disabled={langDetectEnabled && !!detectedLanguage}
-                        >
-                          English
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onSelect={() => setSelectedLanguage("indic")}
-                          disabled={langDetectEnabled && !!detectedLanguage}
-                        >
-                          Indic
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    {langDetectEnabled && detectedLanguage && (
-                      <span className="ml-2 text-xs text-green-600">
-                        Detected: {detectedLanguage}
-                      </span>
-                    )}
-                  </div>
+
                   {error && (
                     <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 p-3 rounded-lg border border-red-200">
                       <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -540,15 +562,15 @@ export default function ProfanityChecker() {
                               %
                             </span>
                           </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-sm font-medium text-slate-600">
+                          {/* <div className="flex justify-between items-center"> */}
+                          {/* <span className="text-sm font-medium text-slate-600">
                               Detected Language:
                             </span>
                             <span className="text-slate-900 font-medium">
                               {transformerResult.detected_language || "-"}
-                            </span>
-                          </div>
-                          <div className="flex justify-between items-center">
+                            </span> */}
+                          {/* </div> */}
+                          {/* <div className="flex justify-between items-center">
                             <span className="text-sm font-medium text-slate-600">
                               User Language:
                             </span>
@@ -583,8 +605,81 @@ export default function ProfanityChecker() {
                             <span className="text-slate-900 font-medium">
                               {transformerResult.toxic_labels || "-"}
                             </span>
-                          </div>
+                          </div> */}
                         </div>
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Button
+                          variant="default"
+                          onClick={handleLLMVerify}
+                          disabled={llmLoading}
+                          className="w-full"
+                        >
+                          {llmLoading ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin" />{" "}
+                              Verifying with LLM...
+                            </>
+                          ) : (
+                            <>Verify with LLM</>
+                          )}
+                        </Button>
+                        {llmResult && (
+                          <div className="bg-slate-100 rounded-lg p-4 mt-2 space-y-2 border border-slate-200">
+                            <div className="flex items-center gap-2">
+                              {llmResult.isProfane ? (
+                                <AlertCircle className="w-4 h-4 text-red-600" />
+                              ) : (
+                                <CheckCircle className="w-4 h-4 text-green-600" />
+                              )}
+                              <span
+                                className={
+                                  llmResult.isProfane
+                                    ? "text-red-700"
+                                    : "text-green-700"
+                                }
+                              >
+                                {llmResult.isProfane
+                                  ? "Profane (LLM)"
+                                  : "Clean (LLM)"}
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm font-medium text-slate-600">
+                                Category:
+                              </span>
+                              <span
+                                className={`px-2 py-1 rounded text-xs font-medium ${
+                                  llmResult.isProfane
+                                    ? "bg-red-100 text-red-700"
+                                    : "bg-green-100 text-green-700"
+                                }`}
+                              >
+                                {llmResult.category}
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm font-medium text-slate-600">
+                                Confidence:
+                              </span>
+                              <span className="text-slate-900 font-medium">
+                                {typeof llmResult?.confidence === "number" &&
+                                !isNaN(llmResult.confidence)
+                                  ? llmResult.confidence.toFixed(1)
+                                  : "0.0"}
+                                %
+                              </span>
+                            </div>
+                            <div className="flex flex-col  items-start">
+                              <span className="text-sm font-medium text-slate-600 pb-1">
+                                Reason:
+                              </span>
+                              <span className="text-slate-900 font-medium">
+                                {llmResult.reasoning}
+                              </span>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}

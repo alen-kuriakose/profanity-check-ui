@@ -55,7 +55,7 @@ export async function verifyWithLLM(word: string) {
   //   process.env.NEXT_PUBLIC_PROFANITY_API_BASEURL
   // );
 
-  const res = await fetch(`${BASE_URL}/api/v1/profanity/llm`, {
+  const res = await fetch(`${BASE_URL}/api/v1/profanity/profanity_validator`, {
     method: "POST",
     headers: { "Content-Type": "application/json", accept: "application/json" },
     body: JSON.stringify({ text: word }),
